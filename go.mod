@@ -1,4 +1,4 @@
-module github.com/mrogaski/go-template
+module github.com/mrogaski/go-tst
 
 go 1.19
 
