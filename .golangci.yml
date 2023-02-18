@@ -77,6 +77,8 @@ linters-settings:
       rules:
         json: snake
   varnamelen:
+    ignore-names:
+      - i
     ignore-decls:
       - r io.Reader
 
