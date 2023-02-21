@@ -16,6 +16,9 @@ type node[V any] struct {
 	loKid     *node[V]
 	eqKid     *node[V]
 	hiKid     *node[V]
+
+	// We use a pointer to the value so that a nil value means no value is assigned to the node (not a terminal node).
+	value *V
 }
 
 // New returns an initialized, empty search tree.
@@ -27,6 +30,10 @@ func New[K ByteSequence, V any]() *TernarySearchTree[K, V] {
 // Insert adds a value to the tree, returning true if the value is updating a previous value or false if this
 // is the first value inserted with the key.
 func (t *TernarySearchTree[K, V]) Insert(key K, value V) bool {
+	if len(key) == 0 {
+		return false
+	}
+
 	sequence := []byte(key)
 
 	nodePtr := &t.root
@@ -53,10 +60,60 @@ func (t *TernarySearchTree[K, V]) Insert(key K, value V) bool {
 		case char > (*nodePtr).splitChar:
 			nodePtr = &(*nodePtr).hiKid
 		default:
-			nodePtr = &(*nodePtr).eqKid
 			i++
+			if i == len(sequence) {
+				(*nodePtr).value = &value
+
+				break
+			}
+
+			nodePtr = &(*nodePtr).eqKid
 		}
 	}
 
 	return updated
+}
+
+// Get returns the value associated with the key if it is present in the tree and a boolean to indicate if there
+// is a batch.
+func (t *TernarySearchTree[K, V]) Get(key K) (V, bool) {
+	var result V
+
+	if len(key) == 0 {
+		return result, false
+	}
+
+	sequence := []byte(key)
+
+	nodePtr := &t.root
+
+	i := 0
+
+	for {
+		if *nodePtr == nil {
+			break
+		}
+
+		if i >= len(sequence) {
+			break
+		}
+
+		char := sequence[i]
+
+		switch {
+		case char < (*nodePtr).splitChar:
+			nodePtr = &(*nodePtr).loKid
+		case char > (*nodePtr).splitChar:
+			nodePtr = &(*nodePtr).hiKid
+		default:
+			i++
+			if i == len(sequence) && (*nodePtr).value != nil {
+				return *(*nodePtr).value, true
+			}
+
+			nodePtr = &(*nodePtr).eqKid
+		}
+	}
+
+	return result, false
 }

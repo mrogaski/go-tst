@@ -64,8 +64,9 @@ linters-settings:
   ireturn:
     allow:
       - error
-      - T
       - Logger
+      - T
+      - V
   lll:
     line-length: 140
   maligned:
